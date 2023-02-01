@@ -14,5 +14,5 @@
 ##### 1.申請帳號以及安裝 CLI 登入可參考：https://docs.deta.sh/docs/micros/getting_started
 ##### 2.開啟 PowerShell ，創立一個新的作業資料夾。如創立 hungry_worker 資料夾為 `deta new --python hungry_worker` 。
 ##### 3.此時會出現類似 ![alt text](https://cdn-images-1.medium.com/max/1000/1*D1dyv86VpQFsHTz_dr0nUA.png)，endpoint 上的 url 要輸入進 Webhook URL。
-##### 4.進入 hungry_worker 資料夾，將此 repo 中的 main.py (取代內建的) 和 requirements.txt 放進去。
+##### 4.進入 hungry_worker 資料夾，將此 repo 中的 main.py (取代內建的)、hungryworker.py(相依套件) 和 requirements.txt 放進去。
 ##### 5.PowerShell 輸入 deta deploy，如此便能完成布署。
