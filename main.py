@@ -2,13 +2,15 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from hungryworker import HUNGRYWORKER
 import requests
-from random import randint
+
 
 app = Flask(__name__)
 
 line_bot_api = LineBotApi('YOUR_CHANNEL_ACCESS_TOKEN')
 handler = WebhookHandler('YOUR_CHANNEL_SECRET')
+
 
 @app.route("/callback", methods=["POST"])
 def callback():
@@ -28,48 +30,11 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     keyword = event.message.text.lower()
-    
-    
+    worker = HUNGRYWORKER()
     if keyword == "訂飲料":
-        output = get_menu()
+        output = worker.get_menu()
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=output))
 
-headers = {
-            "referer": "https://www.foodpanda.com.tw/",
-            "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Mobile Safari/537.36",
-        }
-def _pick_url():
-    urls = ['z5uw', 'n9qx', 'rghb', 'u6y4', 'kd3t']
-    flag = 400
-    while flag == 400:
-        url = f"https://tw.fd-api.com/api/v5/vendors/{urls[randint(0, len(urls)-1)]}?include=menus,bundles,multiple_discounts&language_id=6&dynamic_pricing=0&opening_type=delivery&basket_currency=TWD&latitude=24.8055183&longitude=120.9915418"
-        check = requests.get(url, headers=headers).json()
-        flag = check["status_code"]
-    return url
-
-def get_menu():
-    url = _pick_url()
-    data = requests.get(url, headers=headers).json()
-    title = data["data"]["name"]
-    menus = data["data"]["menus"][0]["menu_categories"]
-    emojis = ["🥤", "☕", "🧃", "🧉", "🍹"]
-    output = ""
-    output += (f"訂飲料囉~!\n今天喝📢{title}!\n")
-    for idx in range(len(menus)):
-        output += emojis[randint(0, len(emojis)-1)]+"\n"
-        if "注意事項" not in menus[idx]["name"]:
-            for product in menus[idx]["products"]:
-                if not product["is_sold_out"]:
-                    price = ""
-                    for info in product["product_variations"]:
-                        if "name" in info:
-                            price += (
-                                f'{int(round(info["price"], 0))}/{info["name"]} '
-                            )
-                        else:
-                            price += f'{int(round(info["price"], 0))} '
-                    output +=(f'{product["name"]} ($:{price})\n')
-    return output
 
 if __name__ == "__main__":
     app.run()
